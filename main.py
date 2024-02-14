@@ -12,6 +12,7 @@ from datetime import date
 
 
 app = Flask(__name__)
+# Initialise the CKEditor
 ckeditor = CKEditor(app)
 app.config['SECRET_KEY'] = os.urandom(12)
 Bootstrap5(app)
@@ -70,6 +71,18 @@ def show_post(post_id):
 @app.route('/new-post', methods=["GET", "POST"])
 def add_new_post():
     form = PostForm()
+    if form.validate_on_submit():
+        new_post = BlogPost(
+            body=form.body.data,
+            title=form.title.data,
+            subtitle=form.subtitle.data,
+            date=date.today().strftime('%B %d, %Y'),
+            author=form.author.data,
+            img_url=form.img_url.data,
+        )
+        db.session.add(new_post)
+        db.session.commit()
+        return redirect(url_for("get_all_posts"))
     return render_template("make-post.html", form=form)
 
 
